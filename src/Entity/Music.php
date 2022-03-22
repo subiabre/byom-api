@@ -18,8 +18,12 @@ class Music
     private $id;
 
     #[ORM\Column(type: 'object')]
-    #[ApiProperty(readable: false)]
+    #[ApiProperty(readable: false, writable: false)]
     private $storage;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[ApiProperty(writable: false)]
+    private $hash;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $title;
@@ -31,7 +35,7 @@ class Music
     private $artist;
 
     #[ORM\Column(type: 'array', nullable: true)]
-    #[ApiProperty(readable: false)]
+    #[ApiProperty(readable: false, writable: false)]
     private $picture = [];
 
     #[ORM\Column(type: 'array', nullable: true)]
@@ -50,6 +54,18 @@ class Music
     public function setStorage(StorageInterface $storage): self
     {
         $this->storage = $storage;
+
+        return $this;
+    }
+
+    public function getHash(): string
+    {
+        return $this->hash;
+    }
+
+    public function setHash(string $hash): self
+    {
+        $this->hash = $hash;
 
         return $this;
     }

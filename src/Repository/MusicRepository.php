@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Music;
+use App\Storage\StorageInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -43,6 +44,16 @@ class MusicRepository extends ServiceEntityRepository
         if ($flush) {
             $this->_em->flush();
         }
+    }
+
+    public function findOneByHash(string $hash): ?Music
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.hash = :val')
+            ->setParameter('val', $hash)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
     }
 
     // /**

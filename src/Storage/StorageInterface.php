@@ -14,4 +14,9 @@ interface StorageInterface
      * Obtain the path to this file
      */
     public function getPath(): string;
+
+    /**
+     * Obtains the hash string based on the file
+     */
+    public function getHash(): string;
 }
