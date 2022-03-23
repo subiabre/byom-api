@@ -7,6 +7,7 @@ use App\Repository\MusicRepository;
 use App\Service\Metadata\MetadataService;
 use App\Service\StorageService;
 use App\Storage\LocalStorage;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,17 +24,20 @@ class MusicSourceLocalCommand extends Command
     private StorageService $storageService;
     private MetadataService $metadataService;
     private MusicRepository $musicRepository;
+    private EntityManagerInterface $em;
 
     public function __construct(
         StorageService $storageService,
         MetadataService $metadataService,
         MusicRepository $musicRepository,
+        EntityManagerInterface $entityManagerInterface
     ) {
         parent::__construct();
 
         $this->storageService = $storageService;
         $this->metadataService = $metadataService;
         $this->musicRepository = $musicRepository;
+        $this->em = $entityManagerInterface;
     }
 
     protected function configure()
@@ -44,15 +48,14 @@ class MusicSourceLocalCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $path = $this->storageService->buildPath(LocalStorage::LOCAL_STORAGE_PATH, $input->getArgument('path'));
 
-        $storage = new LocalStorage;
-        $files = $this->storageService->readDirectory($path);
-        
+        $files = $this->storageService->readDirectory($input->getArgument('path'));
+
         foreach ($io->progressIterate($files) as $key => $file) {
             $metadata = $this->metadataService->getMetadata($file);
             if (!$metadata) continue;
 
+            $storage = new LocalStorage;
             $storage->setPath($file);
 
             $music = $this->musicRepository->findOneByHash($storage->getHash());
@@ -66,8 +69,10 @@ class MusicSourceLocalCommand extends Command
             $music->setMetadata($metadata->getExtra());
             $music->setPicture($metadata->getPicture());
 
-            $this->musicRepository->add($music, $key === array_key_last($files));
+            $this->em->persist($music);
         }
+
+        $this->em->flush();
 
         $io->success('Local music sourcing finished successfully.');
 

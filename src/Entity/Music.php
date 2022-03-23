@@ -2,14 +2,44 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Controller\PictureController;
+use App\Controller\StreamController;
+use App\Filter\OrderRandomFilter;
 use App\Repository\MusicRepository;
 use App\Storage\StorageInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MusicRepository::class)]
-#[ApiResource]
+#[ORM\Index(name: 'hash_idx', columns: ['hash'])]
+#[ApiResource(
+    collectionOperations: ['get'],
+    itemOperations: [
+        'get',
+        'stream' => [
+            'method' => 'GET',
+            'path' => '/music/{id}/stream',
+            'controller' => StreamController::class
+        ],
+        'picture' => [
+            'method' => 'GET',
+            'path' => '/music/{id}/picture',
+            'controller' => PictureController::class
+        ]
+    ]
+)]
+#[ApiFilter(
+    SearchFilter::class,
+    properties: [
+        'title' => 'partial',
+        'album' => 'partial',
+        'artist' => 'partial'
+    ]
+)]
+#[ApiFilter(OrderRandomFilter::class, properties: ['id'])]
 class Music
 {
     #[ORM\Id]
