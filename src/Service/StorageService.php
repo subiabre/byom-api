@@ -29,7 +29,7 @@ class StorageService
         $files = [];
 
         foreach ($directory as $key => $value) {
-            $item = $this->buildPath($path, $value);
+            $item = $this->buildPath(rtrim($path, '\\/'), $value);
 
             if (!is_dir($item)) {
                 $files[] = $item;
