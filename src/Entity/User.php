@@ -16,7 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: '`user`')]
 #[API\ApiResource(
     normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:write']]
+    denormalizationContext: ['groups' => ['user:write']],
+    security: "is_granted('IS_AUTHENTICATED_FULLY')"
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
