@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata as API;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -42,6 +44,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     #[Groups(['user:write'])]
     private ?string $password = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserToken::class, orphanRemoval: true)]
+    private Collection $userTokens;
+
+    public function __construct()
+    {
+        $this->userTokens = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -111,5 +121,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
+    }
+
+    /**
+     * @return Collection<int, UserToken>
+     */
+    public function getUserTokens(): Collection
+    {
+        return $this->userTokens;
+    }
+
+    public function addUserToken(UserToken $userToken): self
+    {
+        if (!$this->userTokens->contains($userToken)) {
+            $this->userTokens->add($userToken);
+            $userToken->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserToken(UserToken $userToken): self
+    {
+        if ($this->userTokens->removeElement($userToken)) {
+            // set the owning side to null (unless already changed)
+            if ($userToken->getUser() === $this) {
+                $userToken->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
