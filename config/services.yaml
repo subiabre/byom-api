@@ -20,6 +20,9 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\Snowflake\SnowflakeService:
+        arguments: ['%env(SNOWFLAKE_EPOCH)%']
+
     App\Controller\AuthController:
         arguments: ['%env(APP_SECRET)%']
 
