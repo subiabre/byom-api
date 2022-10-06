@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Metadata as API;
 use App\Repository\UserRepository;
+use App\State\UserStateProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,7 +20,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[API\ApiResource(
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
-    security: "is_granted('IS_AUTHENTICATED_FULLY')"
+    operations: [
+        new API\GetCollection(),
+        new API\Post(processor: UserStateProcessor::class),
+        new API\Get(),
+        new API\Put(),
+        new API\Delete(),
+        new API\Patch()
+    ]
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
