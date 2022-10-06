@@ -26,7 +26,7 @@ class ByomSecretRegenerateCommand extends Command
 
         $secret = substr(hash('sha256', random_bytes($input->getArgument('random_bytes'))), 0, 32);
 
-        shell_exec('sed -i -E "s/^APP_SECRET=.{32}$/APP_SECRET=' . $secret . '/" .env.local');
+        shell_exec('sed -i -E "s/^APP_SECRET=.*$/APP_SECRET=' . $secret . '/" .env.local');
         $io->success('New APP_SECRET was generated.');
 
         return Command::SUCCESS;
