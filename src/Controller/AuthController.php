@@ -6,6 +6,7 @@ use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Symfony\Routing\IriConverter;
 use App\Entity\UserToken;
 use App\Repository\UserRepository;
+use App\Service\Snowflake\SnowflakeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,17 +21,20 @@ class AuthController extends AbstractController
     private string $appSecret;
     private IriConverter $iriConverter;
     private UserRepository $userRepository;
+    private SnowflakeService $snowflakeService;
     private EntityManagerInterface $entityManager;
 
     public function __construct(
         string $appSecret,
         IriConverterInterface $iriConverterInterface,
         UserRepository $userRepository,
+        SnowflakeService $snowflakeService,
         EntityManagerInterface $entityManagerInterface,
     ) {
         $this->appSecret = $appSecret;
         $this->iriConverter = $iriConverterInterface;
         $this->userRepository = $userRepository;
+        $this->snowflakeService = $snowflakeService;
         $this->entityManager = $entityManagerInterface;
     }
 
@@ -83,24 +87,24 @@ class AuthController extends AbstractController
 
         $user = $this->userRepository->findOneBy(['username' => $this->getUser()->getUserIdentifier()]);
 
-        $jwt = JWT::encode([
-            'iss' => '192.168.0.13',
-            'sub' => $this->getUser()->getUserIdentifier(),
-            'exp' => (new \DateTime())->add(new \DateInterval('P10D'))->getTimestamp(),
-            'nbf' => (new \DateTime())->getTimestamp()
-        ], $this->appSecret, 'HS256');
+        foreach ($user->getUserTokens() as $token) {
+            $this->entityManager->remove($token);
+        }
+        $this->entityManager->flush();
 
         $token = new UserToken();
-        $token->setToken($jwt);
         $token->setUser($user);
+        $token->setId($this->snowflakeService->generateId());
+        $token->setToken(JWT::encode([
+            'jti' => $token->getId(),
+            'exp' => (new \DateTime())->add(new \DateInterval('P1D'))->getTimestamp(),
+        ], $this->appSecret, 'HS256'));
 
         $this->entityManager->persist($token);
         $this->entityManager->flush();
 
         return new JsonResponse(
-            [
-                'token' => $jwt
-            ],
+            [ 'token' => $token->getToken() ],
             Response::HTTP_CREATED
         );
     }
