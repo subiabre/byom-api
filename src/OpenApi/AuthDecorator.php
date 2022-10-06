@@ -72,7 +72,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                 ],
                 summary: 'Authenticates a User resource.',
                 requestBody: new Model\RequestBody(
-                    description: 'Validates the User username and password.',
+                    description: 'The User credentials',
                     required: true,
                     content: new \ArrayObject([
                         'application/json' => [
@@ -106,7 +106,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                 tags: ['Auth'],
                 responses: [
                     '201' => [
-                        'description' => 'Get authentication token',
+                        'description' => 'Get Authentication Token',
                         'content' => [
                             'application/json' => [
                                 'schema' => [
@@ -119,8 +119,8 @@ final class AuthDecorator implements OpenApiFactoryInterface
                         'description' => 'Invalid request',
                     ],
                 ],
-                summary: 'Get an authentication token for the authenticated User.',
-                description: 'The authentication token can be used to validate a session against POST /auth/token.',
+                summary: 'Get an Authentication Token for the authenticated User.',
+                description: 'This will generate a new token and delete all the previously existing ones for the User.',
                 security: [],
             ),
             post: new Model\Operation(
@@ -144,9 +144,10 @@ final class AuthDecorator implements OpenApiFactoryInterface
                         'description' => 'Invalid request',
                     ],
                 ],
-                summary: 'Authenticates a User resource.',
+                summary: 'Authenticates a User resource via an Authentication Token.',
+                description: 'Once the User is authenticated the Authentication Token will not be available again.',
                 requestBody: new Model\RequestBody(
-                    description: 'Validates the Auth token.',
+                    description: 'The Authentication Token to be verified',
                     required: true,
                     content: new \ArrayObject([
                         'application/json' => [
