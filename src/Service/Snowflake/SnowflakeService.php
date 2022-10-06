@@ -13,7 +13,7 @@ class SnowflakeService
     )
     {
         $snowflake = new Snowflake(null, intval(hash('crc32b', $_ENV['HOSTNAME'] ?? ''), 16));
-        $snowflake->setStartTimeStamp(intval($snowflakeEpoch) * 1000);
+        $snowflake->setStartTimeStamp($snowflakeEpoch * 1000);
         $snowflake->setSequenceResolver(new CryptSafeRandomSequenceResolver());
 
         $this->snowflake = $snowflake;
