@@ -20,6 +20,11 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\SessionService:
+        arguments:
+            - '%env(CORS_ALLOW_ORIGIN)%'
+            - '%env(SESSION_COOKIE_LIFETIME)%'
+
     App\Service\Snowflake\SnowflakeService:
         arguments: ['%env(SNOWFLAKE_EPOCH)%']
 
