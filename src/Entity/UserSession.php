@@ -14,8 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:write']],
     operations: [
-        new API\GetCollection(processor: UserSessionStateProcessor::class),
-        new API\Delete(security: "object.user == user")
+        new API\GetCollection(),
+        new API\Delete(security: "object.getUser() == user", processor: UserSessionStateProcessor::class)
     ]
 )]
 class UserSession

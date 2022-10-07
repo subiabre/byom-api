@@ -7,6 +7,7 @@ use App\Entity\UserSession;
 use App\Repository\UserSessionRepository;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionUtils;
 
 class SessionService
 {
@@ -22,6 +23,31 @@ class SessionService
         $this->cookieDomain = $cookieDomain;
         $this->cookieLifetime = $cookieLifetime;
         $this->userSessionRepository = $userSessionRepository;
+    }
+
+    /**
+     * Invalidates a specific session without invalidating the currently active session
+     * @param string $id The id of the session to be invalidated
+     */
+    public function invalidateSession(string $id): void
+    {
+        $session = new Session();
+        $currentId = $session->getId();
+
+        $session->save();
+        $session->setId($id);
+        $session->start();
+        $session->invalidate();
+
+        /**
+         * Symfony\Component\HttpFoundation\Session\Session::invalidate() will set the session cookie as 'deleted'
+         * So we avoid that because we don't really wan't to log out the user
+         */
+        SessionUtils::popSessionCookie($session->getName(), 'deleted');
+
+        $session->save();
+        $session->setId($currentId);
+        $session->start();
     }
 
     /**
@@ -44,11 +70,11 @@ class SessionService
 
     /**
      * Creates a session `UserSession` with the expiration date updated
-     * @param Session $session
      * @param User $user The user entity to take if this entity is a new one
+     * @param Session $session
      * @return UserSession|null
      */
-    public function refreshUserSession(Session $session, User $user): ?UserSession
+    public function refreshUserSession(User $user, Session $session): ?UserSession
     {
         $userSession = $this->userSessionRepository->findOneBy(['sessionId' => $session->getId()]) ?? new UserSession();
 
