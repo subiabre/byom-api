@@ -11,6 +11,7 @@ framework:
         save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
         cookie_secure: auto
         cookie_samesite: lax
+        cookie_domain: '%env(CORS_ALLOW_ORIGIN)%'
         cookie_lifetime: '%env(SESSION_COOKIE_LIFETIME)%'
         storage_factory_id: session.storage.factory.native
 
