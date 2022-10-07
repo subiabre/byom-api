@@ -40,20 +40,24 @@ class ResponseSubscriber implements EventSubscriberInterface
 
     public function refreshSession(ResponseEvent $event)
     {
-        $session = $event->getRequest()->getSession();
-        $token = $this->tokenStorage->getToken();
-        $user = $this->userRepository->findByUser($token?->getUser());
+        try {
+            $session = $event->getRequest()->getSession();
+            $token = $this->tokenStorage->getToken();
+            $user = $this->userRepository->findByUser($token?->getUser());
 
-        if (!$session->isStarted() || !$token || !$user) return;
+            if (!$session->isStarted() || !$token || !$user) return;
 
-        $cookie = $this->sessionService->refreshCookie($session);
-        $entity = $this->sessionService->refreshUserSession($session, $user);
+            $cookie = $this->sessionService->refreshCookie($session);
+            $entity = $this->sessionService->refreshUserSession($session, $user);
 
-        $entity->setUserAgent($event->getRequest()->headers->get('User-Agent'));
+            $entity->setUserAgent($event->getRequest()->headers->get('User-Agent'));
 
-        $this->entityManager->persist($entity);
-        $this->entityManager->flush();
+            $this->entityManager->persist($entity);
+            $this->entityManager->flush();
 
-        $event->getResponse()->headers->setCookie($cookie);
+            $event->getResponse()->headers->setCookie($cookie);
+        } catch (\Throwable $th) {
+            return;
+        }
     }
 }
