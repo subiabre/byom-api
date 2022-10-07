@@ -2,13 +2,19 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata as API;
 use App\Repository\UserSessionRepository;
+use App\State\UserSessionStateProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserSessionRepository::class)]
-#[ApiResource]
+#[API\ApiResource(
+    operations: [
+        new API\GetCollection(processor: UserSessionStateProcessor::class),
+        new API\Delete(security: "object.user == user")
+    ]
+)]
 class UserSession
 {
     #[ORM\Id]
@@ -20,6 +26,7 @@ class UserSession
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
+    #[API\ApiProperty(readable: false)]
     #[ORM\Column(length: 32)]
     private ?string $sessionId = null;
 
