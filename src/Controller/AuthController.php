@@ -85,7 +85,7 @@ class AuthController extends AbstractController
             return $this->error('No Authentication key found in request.');
         }
 
-        $user = $this->userRepository->findOneBy(['username' => $this->getUser()->getUserIdentifier()]);
+        $user = $this->userRepository->findByUser($this->getUser());
 
         foreach ($user->getUserTokens() as $token) {
             $this->entityManager->remove($token);

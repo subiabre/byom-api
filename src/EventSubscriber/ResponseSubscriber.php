@@ -42,7 +42,7 @@ class ResponseSubscriber implements EventSubscriberInterface
     {
         $session = $event->getRequest()->getSession();
         $token = $this->tokenStorage->getToken();
-        $user = $this->userRepository->findOneBy(['username' => $token->getUser()->getUserIdentifier()]);
+        $user = $this->userRepository->findByUser($token?->getUser());
 
         if (!$session->isStarted() || !$token || !$user) return;
 
