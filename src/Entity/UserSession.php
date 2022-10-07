@@ -7,9 +7,12 @@ use App\Repository\UserSessionRepository;
 use App\State\UserSessionStateProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserSessionRepository::class)]
 #[API\ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
     operations: [
         new API\GetCollection(processor: UserSessionStateProcessor::class),
         new API\Delete(security: "object.user == user")
@@ -17,6 +20,7 @@ use Doctrine\ORM\Mapping as ORM;
 )]
 class UserSession
 {
+    #[Groups(['user:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -26,16 +30,18 @@ class UserSession
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[API\ApiProperty(readable: false)]
     #[ORM\Column(length: 32)]
     private ?string $sessionId = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateCreated = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateExpires = null;
 
+    #[Groups(['user:read'])]
     #[ORM\Column(length: 255)]
     private ?string $userAgent = null;
 
