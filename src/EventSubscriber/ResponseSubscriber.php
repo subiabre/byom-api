@@ -48,7 +48,7 @@ class ResponseSubscriber implements EventSubscriberInterface
             if (!$session->isStarted() || !$token || !$user) return;
 
             $cookie = $this->sessionService->refreshCookie($session);
-            $entity = $this->sessionService->refreshUserSession($session, $user);
+            $entity = $this->sessionService->refreshUserSession($user, $session);
 
             $entity->setUserAgent($event->getRequest()->headers->get('User-Agent'));
 
