@@ -78,7 +78,7 @@ class AuthController extends AbstractController
         );
     }
 
-    #[Route('/token', name: 'app_auth_token', methods: ['GET'])]
+    #[Route('/token', name: 'app_auth_token', methods: ['PUT'])]
     public function token(): Response
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -86,42 +86,18 @@ class AuthController extends AbstractController
         }
 
         $user = $this->userRepository->findByUser($this->getUser());
-
-        foreach ($user->getUserTokens() as $token) {
-            $this->entityManager->remove($token);
-        }
-        $this->entityManager->flush();
-
-        $token = new UserToken();
-        $token->setUser($user);
-        $token->setId($this->snowflakeService->generateId());
-        $token->setToken(JWT::encode([
-            'jti' => $token->getId(),
-            'exp' => (new \DateTime())->add(new \DateInterval('P1D'))->getTimestamp(),
-        ], $this->appSecret, 'HS256'));
-
-        $this->entityManager->persist($token);
-        $this->entityManager->flush();
+        $token = JWT::encode(
+            [
+                'user' => $user->getId(),
+                'exp' => (new \DateTime())->add(new \DateInterval('P1D'))->getTimestamp(),
+            ],
+            $this->appSecret,
+            'HS256'
+        );
 
         return new JsonResponse(
-            [ 'token' => $token->getToken() ],
+            [ 'token' => $token ],
             Response::HTTP_CREATED
-        );
-    }
-
-    #[Route('/token', name: 'app_auth_token_login', methods: ['POST'])]
-    public function tokenLogin(Request $request): Response
-    {
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->error('No Authentication key found in request.');
-        }
-
-        return new Response(
-            null,
-            Response::HTTP_NO_CONTENT,
-            [
-                'Location' => $this->iriConverter->getIriFromResource($this->getUser())
-            ]
         );
     }
 }

@@ -2,8 +2,7 @@
 
 namespace App\Security;
 
-use App\Repository\UserTokenRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\UserRepository;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,25 +20,19 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 class TokenAuthenticator extends AbstractAuthenticator
 {
     private string $appSecret;
-    private UserTokenRepository $userTokenRepository;
-    private EntityManagerInterface $entityManager;
+    private UserRepository $userRepository;
 
     public function __construct(
         string $appSecret,
-        UserTokenRepository $userTokenRepository,
-        EntityManagerInterface $entityManagerInterface
+        UserRepository $userRepository,
     ) {
         $this->appSecret = $appSecret;
-        $this->userTokenRepository = $userTokenRepository;
-        $this->entityManager = $entityManagerInterface;
+        $this->userRepository = $userRepository;
     }
 
     public function supports(Request $request): ?bool
     {
-        if (
-            $request->getPathInfo() === '/api/auth/token' &&
-            $request->getMethod() === Request::METHOD_POST
-        ) {
+        if ($request->headers->get('Authorization')) {
             return true;
         }
 
@@ -50,19 +43,15 @@ class TokenAuthenticator extends AbstractAuthenticator
     {
         try {
             $jwt = (array) JWT::decode(
-                json_decode($request->getContent(), true)['token'],
+                trim(preg_replace('/^Bearer/', '', $request->headers->get('Authorization'))),
                 new Key($this->appSecret, 'HS256')
             );
 
             return new SelfValidatingPassport(
-                new UserBadge($jwt['jti'], function($jti) {
-                    $userToken = $this->userTokenRepository->find($jti);
-                    $user = $userToken?->getUser();
+                new UserBadge($jwt['user'], function($user) {
+                    $user = $this->userRepository->find($user);
 
                     if (!$user) throw new UserNotFoundException();
-
-                    $this->entityManager->remove($userToken);
-                    $this->entityManager->flush();
 
                     return $user;
                 })
