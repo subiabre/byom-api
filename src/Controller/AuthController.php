@@ -4,14 +4,10 @@ namespace App\Controller;
 
 use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Symfony\Routing\IriConverter;
-use App\Entity\UserToken;
 use App\Repository\UserRepository;
-use App\Service\Snowflake\SnowflakeService;
-use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -21,21 +17,15 @@ class AuthController extends AbstractController
     private string $appSecret;
     private IriConverter $iriConverter;
     private UserRepository $userRepository;
-    private SnowflakeService $snowflakeService;
-    private EntityManagerInterface $entityManager;
 
     public function __construct(
         string $appSecret,
         IriConverterInterface $iriConverterInterface,
         UserRepository $userRepository,
-        SnowflakeService $snowflakeService,
-        EntityManagerInterface $entityManagerInterface,
     ) {
         $this->appSecret = $appSecret;
         $this->iriConverter = $iriConverterInterface;
         $this->userRepository = $userRepository;
-        $this->snowflakeService = $snowflakeService;
-        $this->entityManager = $entityManagerInterface;
     }
 
     private function error(string $message): Response
