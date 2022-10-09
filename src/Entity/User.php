@@ -53,15 +53,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:write'])]
     private ?string $password = null;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserToken::class, orphanRemoval: true)]
-    private Collection $userTokens;
-
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserSession::class, orphanRemoval: true)]
     private Collection $userSessions;
 
     public function __construct()
     {
-        $this->userTokens = new ArrayCollection();
         $this->userSessions = new ArrayCollection();
     }
 
@@ -133,36 +129,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
-    }
-
-    /**
-     * @return Collection<int, UserToken>
-     */
-    public function getUserTokens(): Collection
-    {
-        return $this->userTokens;
-    }
-
-    public function addUserToken(UserToken $userToken): self
-    {
-        if (!$this->userTokens->contains($userToken)) {
-            $this->userTokens->add($userToken);
-            $userToken->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserToken(UserToken $userToken): self
-    {
-        if ($this->userTokens->removeElement($userToken)) {
-            // set the owning side to null (unless already changed)
-            if ($userToken->getUser() === $this) {
-                $userToken->setUser(null);
-            }
-        }
-
-        return $this;
     }
 
     /**

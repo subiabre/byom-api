@@ -20,15 +20,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    private UserTokenRepository $userTokenRepository;
-
     public function __construct(
         ManagerRegistry $registry,
-        UserTokenRepository $userTokenRepository
     ) {
         parent::__construct($registry, User::class);
-
-        $this->userTokenRepository = $userTokenRepository;
     }
 
     public function findByUser(?UserInterface $user): ?User
