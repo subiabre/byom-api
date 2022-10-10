@@ -4,10 +4,14 @@ namespace App\Controller;
 
 use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Symfony\Routing\IriConverter;
+use App\Entity\UserSession;
 use App\Repository\UserRepository;
+use App\Service\SessionService;
+use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -17,15 +21,21 @@ class AuthController extends AbstractController
     private string $appSecret;
     private IriConverter $iriConverter;
     private UserRepository $userRepository;
+    private SessionService $sessionService;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         string $appSecret,
         IriConverterInterface $iriConverterInterface,
         UserRepository $userRepository,
+        SessionService $sessionService,
+        EntityManagerInterface $entityManagerInterface
     ) {
         $this->appSecret = $appSecret;
         $this->iriConverter = $iriConverterInterface;
         $this->userRepository = $userRepository;
+        $this->sessionService = $sessionService;
+        $this->entityManager = $entityManagerInterface;
     }
 
     private function error(string $message): Response
@@ -53,11 +63,23 @@ class AuthController extends AbstractController
     }
 
     #[Route('', name: 'app_auth_login', methods: ['POST'])]
-    public function login(): Response
+    public function login(Request $request): Response
     {
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             return $this->error('Invalid login request: check that the Content-Type header is "application/json".');
         }
+
+        $user = $this->userRepository->findByUser($this->getUser());
+
+        $userSession = new UserSession;
+        $userSession->setUser($user);
+        $userSession->setSessionId($request->getSession()->getId());
+        $userSession->setUserAgent($request->headers->get('User-Agent'));
+        $userSession->setDateCreated(new \DateTime());
+        $userSession = $this->sessionService->refreshUserSession($userSession);
+
+        $this->entityManager->persist($userSession);
+        $this->entityManager->flush();
 
         return new Response(
             null,
