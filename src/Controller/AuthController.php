@@ -49,18 +49,6 @@ class AuthController extends AbstractController
     #[Route('/user', name: 'app_auth_user', methods: ['GET'])]
     public function user(Request $request): Response
     {
-        $user = $this->userRepository->findByUser($this->getUser());
-
-        $userSession = new UserSession;
-        $userSession->setUser($user);
-        $userSession->setSessionId($request->getSession()->getId());
-        $userSession->setUserAgent($request->headers->get('User-Agent'));
-        $userSession->setDateCreated(new \DateTime());
-        $userSession = $this->sessionService->refreshUserSession($userSession);
-
-        $this->entityManager->persist($userSession);
-        $this->entityManager->flush();
-
         return new Response(
             null,
             Response::HTTP_NO_CONTENT,
