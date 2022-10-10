@@ -7,8 +7,10 @@ use App\Repository\UserSessionRepository;
 use App\State\UserSessionStateProcessor;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
+#[UniqueEntity(fields: ['sessionId'])]
 #[ORM\Entity(repositoryClass: UserSessionRepository::class)]
 #[API\ApiResource(
     normalizationContext: ['groups' => ['user:read']],
