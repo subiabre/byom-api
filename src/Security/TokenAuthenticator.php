@@ -32,7 +32,7 @@ class TokenAuthenticator extends AbstractAuthenticator
 
     public function supports(Request $request): ?bool
     {
-        if ($request->headers->get('Authorization')) {
+        if ($request->getMethod() === Request::METHOD_POST && $request->getPathInfo() === '/api/auth/token') {
             return true;
         }
 
@@ -43,7 +43,7 @@ class TokenAuthenticator extends AbstractAuthenticator
     {
         try {
             $jwt = (array) JWT::decode(
-                trim(preg_replace('/^Bearer/', '', $request->headers->get('Authorization'))),
+                json_decode($request->getContent(), true)['token'],
                 new Key($this->appSecret, 'HS256')
             );
 

@@ -93,7 +93,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
             ),
         );
 
-        $openApi->getPaths()->addPath('/api/auth', $pathItem);
+        $openApi->getPaths()->addPath('/api/auth/user', $pathItem);
 
         $pathItem = new Model\PathItem(
             ref: 'Auth',
@@ -121,9 +121,49 @@ final class AuthDecorator implements OpenApiFactoryInterface
                     ],
                 ],
                 summary: 'Get an Authentication Token for the authenticated User.',
-                description: 'This will create a new token that can authenticate the current User in further requests.',
+                description: 'Creates a new token that can authenticate the currently authenticated User.',
                 security: [],
-            )
+            ),
+            post: new Model\Operation(
+                operationId: 'postTokenItem',
+                tags: ['Auth'],
+                responses: [
+                    '204' => [
+                        'description' => 'Get authenticated User resource',
+                        'headers' => [
+                            'Location' => [
+                                'description' => 'The IRI of the authenticated User resource',
+                                'type' => 'string'
+                            ],
+                            'Set-Cookie' => [
+                                'description' => 'HttpOnly cookie with the Authentication key to be used in further API requests',
+                                'type' => 'string'
+                            ]
+                        ]
+                    ],
+                    '400' => [
+                        'description' => 'Invalid request',
+                    ],
+                ],
+                summary: 'Authenticates a User resource via a token.',
+                requestBody: new Model\RequestBody(
+                    description: 'The User token',
+                    required: true,
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [
+                                'properties' => [
+                                    'token' => [
+                                        'type' => 'string',
+                                        'required' => true
+                                    ],
+                                ]
+                            ],
+                        ],
+                    ]),
+                ),
+                security: [],
+            ),
         );
 
         $openApi->getPaths()->addPath('/api/auth/token', $pathItem);
