@@ -65,6 +65,8 @@ class AuthController extends AbstractController
             return $this->error('Invalid login request: check that the Content-Type header is "application/json".');
         }
 
+        if (!$request->getSession()->isStarted()) $request->getSession()->start();
+
         $user = $this->userRepository->findByUser($this->getUser());
 
         $userSession = new UserSession;
@@ -108,28 +110,6 @@ class AuthController extends AbstractController
     #[Route('/token', name: 'app_auth_token_login', methods: ['POST'])]
     public function tokenLogin(Request $request): Response
     {
-        if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
-            return $this->error('Invalid login request: check that the Content-Type header is "application/json".');
-        }
-
-        $user = $this->userRepository->findByUser($this->getUser());
-
-        $userSession = new UserSession;
-        $userSession->setUser($user);
-        $userSession->setSessionId($request->getSession()->getId());
-        $userSession->setUserAgent($request->headers->get('User-Agent'));
-        $userSession->setDateCreated(new \DateTime());
-        $userSession = $this->sessionService->refreshUserSession($userSession);
-
-        $this->entityManager->persist($userSession);
-        $this->entityManager->flush();
-
-        return new Response(
-            null,
-            Response::HTTP_NO_CONTENT,
-            [
-                'Location' => $this->iriConverter->getIriFromResource($this->getUser())
-            ]
-        );
+        return $this->userLogin($request);
     }
 }
