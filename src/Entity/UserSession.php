@@ -17,6 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     denormalizationContext: ['groups' => ['user:write']],
     operations: [
         new API\GetCollection(),
+        new API\Get(),
         new API\Delete(security: "object.getUser() == user", processor: UserSessionStateProcessor::class)
     ]
 )]
@@ -28,6 +29,7 @@ class UserSession
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['user:read'])]
     #[ORM\ManyToOne(inversedBy: 'userSessions')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;

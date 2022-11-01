@@ -83,7 +83,7 @@ class AuthController extends AbstractController
             null,
             Response::HTTP_NO_CONTENT,
             [
-                'Location' => $this->iriConverter->getIriFromResource($this->getUser())
+                'Location' => $this->iriConverter->getIriFromResource($userSession)
             ]
         );
     }

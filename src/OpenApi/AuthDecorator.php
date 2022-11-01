@@ -33,7 +33,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                         'description' => 'Get authenticated User resource',
                         'headers' => [
                             'Location' => [
-                                'description' => 'The IRI of the authenticated User resource',
+                                'description' => 'The IRI of the currently authenticated UserSession resource',
                                 'type' => 'string'
                             ]
                         ]
@@ -53,7 +53,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                         'description' => 'Get authenticated User resource',
                         'headers' => [
                             'Location' => [
-                                'description' => 'The IRI of the authenticated User resource',
+                                'description' => 'The IRI of the generated UserSession resource',
                                 'type' => 'string'
                             ],
                             'Set-Cookie' => [
@@ -132,7 +132,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                         'description' => 'Get authenticated User resource',
                         'headers' => [
                             'Location' => [
-                                'description' => 'The IRI of the authenticated User resource',
+                                'description' => 'The IRI of the generated UserSession resource',
                                 'type' => 'string'
                             ],
                             'Set-Cookie' => [
