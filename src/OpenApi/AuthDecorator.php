@@ -30,7 +30,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                 tags: ['Auth'],
                 responses: [
                     '204' => [
-                        'description' => 'Get authenticated User resource',
+                        'description' => 'Get authenticated UserSession resource',
                         'headers' => [
                             'Location' => [
                                 'description' => 'The IRI of the currently authenticated UserSession resource',
@@ -50,7 +50,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                 tags: ['Auth'],
                 responses: [
                     '204' => [
-                        'description' => 'Get authenticated User resource',
+                        'description' => 'Get authenticated UserSession resource',
                         'headers' => [
                             'Location' => [
                                 'description' => 'The IRI of the generated UserSession resource',
@@ -129,7 +129,7 @@ final class AuthDecorator implements OpenApiFactoryInterface
                 tags: ['Auth'],
                 responses: [
                     '204' => [
-                        'description' => 'Get authenticated User resource',
+                        'description' => 'Get authenticated UserSession resource',
                         'headers' => [
                             'Location' => [
                                 'description' => 'The IRI of the generated UserSession resource',

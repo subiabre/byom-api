@@ -6,6 +6,7 @@ use ApiPlatform\Api\IriConverterInterface;
 use ApiPlatform\Symfony\Routing\IriConverter;
 use App\Entity\UserSession;
 use App\Repository\UserRepository;
+use App\Repository\UserSessionRepository;
 use App\Service\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Firebase\JWT\JWT;
@@ -22,6 +23,7 @@ class AuthController extends AbstractController
     private IriConverter $iriConverter;
     private UserRepository $userRepository;
     private SessionService $sessionService;
+    private UserSessionRepository $userSessionRepository;
     private EntityManagerInterface $entityManager;
 
     public function __construct(
@@ -29,12 +31,14 @@ class AuthController extends AbstractController
         IriConverterInterface $iriConverterInterface,
         UserRepository $userRepository,
         SessionService $sessionService,
+        UserSessionRepository $userSessionRepository,
         EntityManagerInterface $entityManagerInterface
     ) {
         $this->appSecret = $appSecret;
         $this->iriConverter = $iriConverterInterface;
         $this->userRepository = $userRepository;
         $this->sessionService = $sessionService;
+        $this->userSessionRepository = $userSessionRepository;
         $this->entityManager = $entityManagerInterface;
     }
 
@@ -49,11 +53,15 @@ class AuthController extends AbstractController
     #[Route('/user', name: 'app_auth_user', methods: ['GET'])]
     public function user(Request $request): Response
     {
+        if (!$request->getSession()->isStarted()) $request->getSession()->start();
+        
+        $userSession = $this->userSessionRepository->findOneBySession($request->getSession());
+
         return new Response(
             null,
             Response::HTTP_NO_CONTENT,
             [
-                'Location' => $this->iriConverter->getIriFromResource($this->getUser())
+                'Location' => $this->iriConverter->getIriFromResource($userSession)
             ]
         );
     }
